@@ -1,6 +1,6 @@
-package com.atta.PolyPaste.Services;
+package com.atta.PolyPaste.services.rabbit;
 
-import com.atta.PolyPaste.DTO.Paste;
+import com.atta.PolyPaste.dto.Paste;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -9,10 +9,10 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class RabbitMQProducer {
-    @Value("${rabbirmq.exchange.name}")
+    @Value("${rabbitmq.exchange.name}")
     private String exchange;
 
-    @Value("${rabbirmq.routing.key}")
+    @Value("${rabbitmq.routing.key}")
     private String routingKey;
 
     private final RabbitTemplate rabbitTemplate;

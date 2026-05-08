@@ -1,4 +1,4 @@
-package com.atta.PolyPaste.DTO;
+package com.atta.PolyPaste.dto;
 
 import java.util.UUID;
 

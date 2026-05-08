@@ -1,14 +1,15 @@
-package com.atta.PolyPaste.Controllers;
+package com.atta.PolyPaste.controllers;
 
-import com.atta.PolyPaste.DTO.Paste;
-import com.atta.PolyPaste.Mapper.PasteMapper;
-import com.atta.PolyPaste.Entitys.PasteEntity;
-import com.atta.PolyPaste.Services.PasteService;
-import com.atta.PolyPaste.Services.RabbitMQProducer;
+import com.atta.PolyPaste.dto.Paste;
+import com.atta.PolyPaste.mapper.PasteMapper;
+import com.atta.PolyPaste.entitys.PasteEntity;
+import com.atta.PolyPaste.services.PasteService;
+import com.atta.PolyPaste.services.rabbit.RabbitMQProducer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -37,6 +38,17 @@ public class MainRestController {
 		producer.sendMessage(newPaste);
 		return ResponseEntity.status(HttpStatus.OK)
 				.body(inputPaste.toString());
+	}
+
+	@GetMapping("/me")
+	public ResponseEntity<?> getCurrentUser() {
+		var auth = SecurityContextHolder.getContext().getAuthentication();
+
+		if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getName())) {
+			return ResponseEntity.status(401).body("Вы не авторизованы");
+		}
+
+		return ResponseEntity.ok("Ваш ID в контексте: " + auth);
 	}
 
 }

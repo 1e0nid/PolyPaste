@@ -1,7 +1,7 @@
-package com.atta.PolyPaste.Mapper;
+package com.atta.PolyPaste.mapper;
 
-import com.atta.PolyPaste.DTO.Paste;
-import com.atta.PolyPaste.Entitys.PasteEntity;
+import com.atta.PolyPaste.dto.Paste;
+import com.atta.PolyPaste.entitys.PasteEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;

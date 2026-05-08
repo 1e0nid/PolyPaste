@@ -1,4 +1,4 @@
-package com.atta.PolyPaste.Config;
+package com.atta.PolyPaste.config;
 
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
@@ -13,13 +13,13 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RabbitMQConfig {
 
-    @Value("${rabbirmq.queue.name}")
+    @Value("${rabbitmq.queue.name}")
     private String queue;
 
-    @Value("${rabbirmq.exchange.name}")
+    @Value("${rabbitmq.exchange.name}")
     private String exchange;
 
-    @Value("${rabbirmq.routing.key}")
+    @Value("${rabbitmq.routing.key}")
     private String routingKey;
 
     @Bean

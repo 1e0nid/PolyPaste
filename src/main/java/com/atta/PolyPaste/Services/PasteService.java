@@ -1,7 +1,7 @@
-package com.atta.PolyPaste.Services;
+package com.atta.PolyPaste.services;
 
-import com.atta.PolyPaste.Entitys.PasteEntity;
-import com.atta.PolyPaste.Repository.PasteRepository;
+import com.atta.PolyPaste.entitys.PasteEntity;
+import com.atta.PolyPaste.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -11,15 +11,15 @@ public class PasteService {
 
     private static final Logger log = LoggerFactory.getLogger(PasteService.class);
 
-    private final PasteRepository pasteRepository;
+    private final UserRepository userRepository;
 
-    public PasteService(PasteRepository pasteRepository) {
-        this.pasteRepository = pasteRepository;
+    public PasteService(UserRepository userRepository) {
+        this.userRepository = userRepository;
     }
 
     public void createPaste(PasteEntity pasteEntity) {
         log.info(String.format("PasteService: careate paste: %s", pasteEntity.toString()));
-        pasteRepository.save(pasteEntity);
+//        userRepository.save(pasteEntity);
     }
 
 }

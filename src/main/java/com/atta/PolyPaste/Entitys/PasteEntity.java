@@ -1,4 +1,4 @@
-package com.atta.PolyPaste.Entitys;
+package com.atta.PolyPaste.entitys;
 
 import jakarta.persistence.*;
 import lombok.Data;
