@@ -1,30 +1,27 @@
 package com.atta.PolyPaste.Services;
 
-import com.atta.PolyPaste.DTO.Paste;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.atta.PolyPaste.DTO.ModerationResultDTO;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
+@RequiredArgsConstructor
 public class RabbitMQProducer {
-    @Value("${rabbirmq.exchange.name}")
+
+    @Value("${app.rabbitmq.exchange}")
     private String exchange;
 
-    @Value("${rabbirmq.routing.key}")
+    @Value("${app.rabbitmq.routing-key.output}")
     private String routingKey;
 
     private final RabbitTemplate rabbitTemplate;
 
-    private static final Logger log = LoggerFactory.getLogger(RabbitMQProducer.class);
-
-    public RabbitMQProducer(RabbitTemplate rabbitTemplate) {
-        this.rabbitTemplate = rabbitTemplate;
-    }
-
-    public void sendMessage(Paste message){
-        log.info(String.format("RabbitMQProducer: message paste: %s", message.toString()));
-        rabbitTemplate.convertAndSend(exchange, routingKey, message);
+    public void sendModerationResult(ModerationResultDTO result) {
+        log.info("Sending moderation result for ID [{}]: {}", result.getId(), result.getStatus());
+        rabbitTemplate.convertAndSend(exchange, routingKey, result);
     }
 }

@@ -1,0 +1,22 @@
+spring:
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: admin
+    password: admin
+    listener:
+      simple:
+        acknowledge-mode: manual
+        prefetch: 1
+
+app:
+  rabbitmq:
+    queue:
+      input: q1
+      output: q2
+    exchange: moderation-exchange
+    routing-key:
+      output: moderation.result
+  ml:
+    model-path: src/main/resources/models/rubert-tiny-toxic.onnx
+    threshold: 0.3
