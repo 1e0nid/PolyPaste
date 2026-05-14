@@ -2,6 +2,11 @@ spring:
   application:
     name: PolyPaste
 
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
   rabbitmq:
     host: localhost
     port: 5672
@@ -18,29 +23,41 @@ spring:
       ddl-auto: update
     show-sql: true
 
-rabbitmq:
-  queue:
-    name: poly_paste_queue
-  exchange:
-    name: poly_paste_exchange
-  routing:
-    key: poly_paste_key
+app:
+  rabbitmq:
+    queue:
+      input: q1
+      output: q2
+    exchange: moderation-exchange
+    routing-key:
+      input: moderation.input
+      output: moderation.output
+  ml:
+    model-path: src/main/resources/models/rubert-tiny-toxic.onnx
+    threshold: 0.3
+
+  minio:
+    endpoint: http://localhost:9000
+    access-key: admin
+    secret-key: admin
+    bucket: pastes
+    auto-create-bucket: true
 
 jwt:
   secret: 5JzoMbk6E5qIqHSuBTgeQCARtUsxAkBiHwdjXOSW8kWdXzYmP3X51C0
 
 vk:
   app-id: 54580162
-  client-secret: 'g9ngmnjjDNDim7n38lpm'
-  redirect-uri: https://9je8ur-178-66-156-216.ru.tuna.am/auth/vk/callback
+  client-secret: 'DMMaDDCHTGmwcFb0JfU9'
+  redirect-uri: http://localhost/auth/vk/callback
 
 server:
-  address: 127.0.0.1
-  port: 8080
-  forward-headers-strategy: native
-  ssl:
-    enabled: false
-    key-store: classpath:keystore.p12
-    key-store-password: Garfield2008
-    key-store-type: PKCS12
-    key-alias: springboot
+  address: 0.0.0.0
+  port: 80
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+  api-docs:
+    path: /v3/api-docs

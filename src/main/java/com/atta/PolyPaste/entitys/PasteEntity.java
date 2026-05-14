@@ -3,30 +3,44 @@ package com.atta.PolyPaste.entitys;
 import jakarta.persistence.*;
 import lombok.Data;
 
-import java.time.OffsetDateTime;
-import java.util.UUID;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "pastes")
 @Data
-public class PasteEntity{
+public class PasteEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    // Ограничение длины 8 символов для Base62
     @Column(name = "short_url", unique = true, nullable = false, length = 8)
     private String shortUrl;
 
-    // Используем TEXT для контента до 1 МБ
-    @Column(name = "content", nullable = false, columnDefinition = "TEXT")
+    @Column(columnDefinition = "TEXT")
     private String content;
 
-    // Срок хранения (TTL)
-    @Column(name = "expires_at")
-    private OffsetDateTime expiresAt;
+    @Column(name = "creator_id")
+    private String creatorId;
+
+    @Column(name = "first_name")
+    private String firstName;
+
+    @Column(name = "last_Name")
+    private String lastName;
+
+    @Column(name = "syntax")
+    private String syntax;
 
     @Column(name = "created_at")
-    private OffsetDateTime createdAt = OffsetDateTime.now();
+    private LocalDateTime createdAt = LocalDateTime.now();
+
+    @Column(name = "expiration_time")
+    private LocalDateTime expirationTime;
+
+    @Column(name = "burn_after_read")
+    private boolean burnAfterRead = false;
+
+    @Column(name = "status")
+    private String status;
 }

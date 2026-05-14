@@ -1,6 +1,6 @@
 package com.atta.PolyPaste.jwt;
 
-import com.atta.PolyPaste.dto.UserPrincipal;
+import com.atta.PolyPaste.dto.UserPrincipalDto;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -14,7 +14,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collections;
 
 @Component
@@ -26,17 +25,23 @@ public class JwtFilter extends OncePerRequestFilter {
         this.jwtProvider = jwtProvider;
     }
 
+    @Override
     protected void doFilterInternal(
             HttpServletRequest request,
             HttpServletResponse response,
             FilterChain filterChain
-    ) throws ServletException, IOException, AuthenticationException {
+    ) throws ServletException, IOException {
+
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         String jwt = jwtProvider.extractJwt(request);
 
         if (jwt != null && jwtProvider.validateToken(jwt)) {
-
-            UserPrincipal principal = new UserPrincipal(
+            // Твоя логика аутентификации...
+            UserPrincipalDto principal = new UserPrincipalDto(
                     jwtProvider.extractVkUserId(jwt),
                     jwtProvider.extractFirstName(jwt),
                     jwtProvider.extractLastName(jwt)
@@ -51,6 +56,12 @@ public class JwtFilter extends OncePerRequestFilter {
             auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(auth);
         }
+
         filterChain.doFilter(request, response);
+    }
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        return request.getServletPath().startsWith("/auth/");
     }
 }

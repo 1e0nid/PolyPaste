@@ -1,6 +1,5 @@
 package com.atta.PolyPaste.jwt;
 
-import com.atta.PolyPaste.repository.UserRepository;
 import com.atta.PolyPaste.repository.VkUserRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -69,12 +68,9 @@ public class JwtProvider {
     }
 
     public String extractJwt(HttpServletRequest request) {
-        if (request.getCookies() != null) {
-            for (Cookie cookie : request.getCookies()) {
-                if ("jwt_token".equals(cookie.getName())) {
-                    return cookie.getValue();
-                }
-            }
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            return authHeader.substring(7);
         }
         return null;
     }
