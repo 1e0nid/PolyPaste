@@ -30,16 +30,28 @@
       
       <div v-if="auth.isAuthenticated" class="profile" @click="toggleDropdown">
         <div class="profile-info">
-          <span class="username">{{ auth.user.username }}</span>
+          <span class="username">{{ auth.user.username || 'User' }}</span>
           <span class="provider-info">via {{ auth.user.provider || 'polypaste' }}</span>
         </div>
-        <div class="avatar">{{ auth.user.avatar || '👤' }}</div>
-        <span class="arrow">▼</span>
+
+        <div class="avatar">
+          <img 
+            v-if="auth.user.avatar && auth.user.avatar.includes('/')" 
+            :src="auth.user.avatar" 
+            alt="Фото"
+            class="user-photo"
+            referpolicy="no-referrer" 
+          />
+          <span v-else class="avatar-placeholder">
+            {{ auth.user.username ? auth.user.username.charAt(0).toUpperCase() : '👤' }}
+          </span>
+        </div>
+
+        <span class="arrow" :class="{ 'arrow-rotate': isDropdownOpen }">▼</span>
 
         <div class="dropdown-menu" v-if="isDropdownOpen">
           <ul>
             <li @click.stop="navigate('/my-pastes')">My Pastes</li>
-            <li @click.stop="navigate('/settings')">Settings</li>
             <li class="logout" @click.stop="handleLogout">Log Out</li>
           </ul>
         </div>
@@ -54,24 +66,23 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { useAuthStore } from '@/stores/auth' // Подключили хранилище друга
+import { useAuthStore } from '@/stores/auth'
 
 const router = useRouter()
 const auth = useAuthStore()
 
-// --- ЛОГИКА ПОИСКА ---
 const searchQuery = ref('')
+const apiBase = computed(() => import.meta.env.VITE_API_URL || 'http://localhost:80')
 
 const handleSearch = () => {
-  if (searchQuery.value.trim() === '') return
-  // Оставил твой alert для наглядности (можно заменить на логику друга с console.log)
-  alert(`Поиск по запросу "${searchQuery.value}" появится в следующей версии!`)
+  const query = searchQuery.value.trim()
+  if (query === '') return
+  router.push({ path: '/search', query: { q: query } })
   searchQuery.value = ''
 }
 
-// --- ЛОГИКА МЕНЮ ПРОФИЛЯ ---
 const isDropdownOpen = ref(false)
 const profileRef = ref(null)
 
@@ -79,19 +90,18 @@ const toggleDropdown = () => {
   isDropdownOpen.value = !isDropdownOpen.value
 }
 
-// Функции навигации и выхода от друга
 const navigate = (path) => {
   isDropdownOpen.value = false
   router.push(path)
 }
 
-const handleLogout = () => {
-  auth.logout()
+// 🔥 СИНХРОННЫЙ ЛОГАУТ С БЭКЕНДОМ
+const handleLogout = async () => {
   isDropdownOpen.value = false
+  await auth.logout() // Всё общение с сервером и очистка локальных данных теперь инкапсулированы здесь
   router.push('/login')
 }
 
-// Твоя функция закрытия меню по клику вне его области
 const handleClickOutside = (event) => {
   if (isDropdownOpen.value && profileRef.value && !profileRef.value.contains(event.target)) {
     isDropdownOpen.value = false
@@ -103,7 +113,6 @@ onUnmounted(() => document.removeEventListener('click', handleClickOutside))
 </script>
 
 <style scoped>
-/* Твоя зафиксированная шапка */
 .header {
   position: sticky;
   top: 0;
@@ -119,7 +128,6 @@ onUnmounted(() => document.removeEventListener('click', handleClickOutside))
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-/* --- ЛОГОТИП (Твои исправления стилей ссылок) --- */
 .logo {
   display: flex;
   align-items: center;
@@ -128,9 +136,7 @@ onUnmounted(() => document.removeEventListener('click', handleClickOutside))
   color: white; 
 }
 
-.logo:visited {
-  color: white;
-}
+.logo:visited { color: white; }
 
 .logo-icon {
   background-color: #fbc02d;
@@ -152,7 +158,6 @@ onUnmounted(() => document.removeEventListener('click', handleClickOutside))
   letter-spacing: 2px;
 }
 
-/* --- ЦЕНТРАЛЬНАЯ ЧАСТЬ --- */
 .actions {
   display: flex;
   align-items: center;
@@ -176,17 +181,10 @@ onUnmounted(() => document.removeEventListener('click', handleClickOutside))
   transition: background 0.2s;
 }
 
-.btn-paste:hover {
-  background-color: #81c784;
-}
+.btn-paste:hover { background-color: #81c784; }
 
-.search-bar {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
+.search-bar { position: relative; display: flex; align-items: center; }
 
-/* Твоя ширина поиска 250px */
 .search-bar input {
   background-color: #0d3b13; 
   border: none;
@@ -194,23 +192,13 @@ onUnmounted(() => document.removeEventListener('click', handleClickOutside))
   border-radius: 4px;
   color: white;
   outline: none;
-  width: 180px; /* <--- Измени эту цифру (было 250px) */
+  width: 180px; 
   font-size: 14px;
 }
 
-.search-bar input::placeholder {
-  color: #a5d6a7;
-}
+.search-bar input::placeholder { color: #a5d6a7; }
+.search-icon { position: absolute; right: 10px; font-size: 14px; opacity: 0.7; cursor: pointer; }
 
-.search-icon {
-  position: absolute;
-  right: 10px;
-  font-size: 14px;
-  opacity: 0.7;
-  cursor: pointer;
-}
-
-/* --- ПРОФИЛЬ --- */
 .user-section { position: relative; }
 
 .profile {
@@ -218,12 +206,14 @@ onUnmounted(() => document.removeEventListener('click', handleClickOutside))
   align-items: center;
   gap: 10px;
   cursor: pointer;
+  user-select: none;
 }
 
 .profile-info {
   display: flex;
   flex-direction: column;
   text-align: right;
+  line-height: 1.2;
 }
 
 .username {
@@ -237,23 +227,37 @@ onUnmounted(() => document.removeEventListener('click', handleClickOutside))
 }
 
 .avatar {
-  width: 32px;
-  height: 32px;
+  width: 35px;
+  height: 35px;
   background-color: #ffcc80;
   border-radius: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 20px;
+  font-size: 18px;
+  font-weight: bold;
+  color: #5d4037;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.user-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .arrow {
   font-size: 10px;
   opacity: 0.8;
   padding: 5px;
+  transition: transform 0.3s ease;
 }
 
-/* --- КНОПКА ВОЙТИ (от друга) --- */
+.arrow-rotate {
+  transform: rotate(180deg);
+}
+
 .btn-login-header {
   background: transparent;
   color: white;
@@ -262,18 +266,14 @@ onUnmounted(() => document.removeEventListener('click', handleClickOutside))
   border-radius: 4px;
   cursor: pointer;
   font-weight: bold;
-  transition: background-color 0.2s;
 }
 
-.btn-login-header:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-}
+.btn-login-header:hover { background-color: rgba(255, 255, 255, 0.1); }
 
-/* --- ВЫПАДАЮЩЕЕ МЕНЮ --- */
 .dropdown-menu {
   position: absolute;
   top: 50px; 
-  right: 0;  
+  right: 0;   
   background-color: white;
   border: 1px solid #ccc;
   border-radius: 4px;
@@ -282,11 +282,7 @@ onUnmounted(() => document.removeEventListener('click', handleClickOutside))
   z-index: 1001; 
 }
 
-.dropdown-menu ul {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
+.dropdown-menu ul { list-style: none; margin: 0; padding: 0; }
 
 .dropdown-menu li {
   border-bottom: 1px solid #eee;
@@ -294,18 +290,8 @@ onUnmounted(() => document.removeEventListener('click', handleClickOutside))
   color: #333;
   font-size: 14px;
   cursor: pointer;
-  transition: background-color 0.2s;
 }
 
-.dropdown-menu li:last-child {
-  border-bottom: none;
-}
-
-.dropdown-menu li:hover {
-  background-color: #f5f5f5; 
-}
-
-.dropdown-menu .logout {
-  color: #d32f2f; 
-}
+.dropdown-menu li:hover { background-color: #f5f5f5; }
+.dropdown-menu .logout { color: #d32f2f; }
 </style>

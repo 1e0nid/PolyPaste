@@ -1,80 +1,132 @@
 <template>
   <div class="login-wrapper">
     <div class="login-card">
+
       <div class="login-header">
         <div class="mini-logo">
           <span>0011</span>
           <span>1000</span>
           <span>101</span>
         </div>
+
         <h1>Вход в PolyPaste</h1>
-        <p class="subtitle">Используйте социальные сети для быстрого доступа</p>
+
+        <p class="subtitle">
+          Используйте социальные сети для быстрого доступа
+        </p>
       </div>
 
       <div class="social-actions">
-        <button 
-          class="btn-social btn-vk" 
+
+        <button
+          class="btn-social btn-vk"
           @click="handleSocialLogin('vk')"
           :disabled="isConnecting"
         >
           <span class="icon">VK</span>
-          <span v-if="loadingProvider !== 'vk'">Войти через ВКонтакте</span>
-          <span v-else>Подключение...</span>
+
+          <span v-if="loadingProvider !== 'vk'">
+            Войти через ВКонтакте
+          </span>
+
+          <span v-else>
+            Подключение...
+          </span>
         </button>
 
-        <button 
-          class="btn-social btn-yandex" 
+        <button
+          class="btn-social btn-yandex"
           @click="handleSocialLogin('yandex')"
           :disabled="isConnecting"
         >
           <span class="icon">Y</span>
-          <span v-if="loadingProvider !== 'yandex'">Войти через Яндекс</span>
-          <span v-else>Подключение...</span>
+
+          <span v-if="loadingProvider !== 'yandex'">
+            Войти через Яндекс
+          </span>
+
+          <span v-else>
+            Подключение...
+          </span>
         </button>
+
       </div>
 
       <div class="login-footer">
-        <p>Авторизуясь, вы соглашаетесь с правилами сервиса</p>
-        <p v-if="apiBase">API: <code>{{ apiBase }}</code></p>
+        <p>
+          Авторизуясь, вы соглашаетесь с правилами сервиса
+        </p>
+
+        <p v-if="apiBase">
+          API: <code>{{ apiBase }}</code>
+        </p>
       </div>
+
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, computed, onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 
 const router = useRouter()
+const route = useRoute()
 const auth = useAuthStore()
 
 const isConnecting = ref(false)
 const loadingProvider = ref(null)
 
-// Динамический домен из .env
-const apiBase = computed(() => import.meta.env.VITE_API_URL || window.location.origin)
+const apiBase = computed(
+  () => import.meta.env.VITE_API_URL || window.location.origin
+)
 
+/**
+ * Обработка возврата после OAuth
+ */
+onMounted(() => {
+  const token = route.query.token
+  const error = route.query.error
+
+  // Извлекаем и декодируем данные из URL
+  // decodeURIComponent нужен, чтобы превратить %D0%9B... обратно в "Леонид"
+  // и восстановить спецсимволы в ссылке на аватарку
+  const username = route.query.username ? decodeURIComponent(route.query.username) : 'User'
+  const avatar = route.query.avatar ? decodeURIComponent(route.query.avatar) : null
+  const provider = route.query.provider || 'social'
+
+  if (error) {
+    console.error('OAuth error:', error)
+    alert('Ошибка при входе через соцсеть')
+    return
+  }
+
+  if (token) {
+    // 1. Сохраняем JWT в браузер
+    localStorage.setItem('jwt', token)
+
+    // 2. Записываем ВСЕ данные в AuthStore
+    auth.login({
+      username: username,
+      avatar: avatar,   // Вот она, твоя аватарка!
+      provider: provider
+    })
+
+    // 3. Улетаем на главную, очищая query-параметры из строки браузера
+    router.replace('/')
+  }
+})
+
+/**
+ * Старт процесса OAuth
+ */
 const handleSocialLogin = (provider) => {
   isConnecting.value = true
   loadingProvider.value = provider
 
-  // В реальности здесь был бы редирект:
-  // window.location.href = `${apiBase.value}/auth/${provider}/login`;
-
-  // Имитация задержки ответа сервера
-  setTimeout(() => {
-    const mockUserData = {
-      username: provider === 'vk' ? 'Эрнест_ВК' : 'Ernest_Yandex',
-      avatar: provider === 'vk' ? '🔵' : '🔴',
-      provider: provider
-    }
-    
-    auth.login(mockUserData)
-    isConnecting.value = false
-    loadingProvider.value = null
-    router.push('/')
-  }, 1000)
+  // Редирект на бэкенд для начала авторизации
+  window.location.href = `/auth/${provider}/login`
 }
 </script>
 
@@ -84,6 +136,7 @@ const handleSocialLogin = (provider) => {
   justify-content: center;
   align-items: center;
   min-height: 400px;
+  padding-top: 50px;
 }
 
 .login-card {
@@ -107,12 +160,27 @@ const handleSocialLogin = (provider) => {
   border-radius: 3px;
   margin-bottom: 15px;
   transform: rotate(-5deg);
+  font-weight: bold;
 }
 
-h1 { color: #1b5e20; font-size: 24px; margin: 0 0 10px 0; }
-.subtitle { color: #666; font-size: 14px; }
+h1 {
+  color: #1b5e20;
+  font-size: 24px;
+  margin: 0 0 10px 0;
+}
 
-.social-actions { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
+.subtitle {
+  color: #666;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.social-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 25px;
+}
 
 .btn-social {
   display: flex;
@@ -125,22 +193,44 @@ h1 { color: #1b5e20; font-size: 24px; margin: 0 0 10px 0; }
   font-weight: bold;
   cursor: pointer;
   color: white;
+  transition: filter 0.2s;
 }
 
-.btn-social:disabled { opacity: 0.6; cursor: not-allowed; }
+.btn-social:hover:not(:disabled) {
+  filter: brightness(1.1);
+}
+
+.btn-social:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .btn-vk { background-color: #0077FF; }
 .btn-yandex { background-color: #f33; }
 
 .icon {
   background: rgba(255, 255, 255, 0.2);
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 4px;
+  font-size: 12px;
 }
 
-.login-footer { margin-top: 30px; font-size: 12px; color: #999; }
-code { background: #eee; padding: 2px 4px; }
+.login-footer {
+  margin-top: 35px;
+  font-size: 12px;
+  color: #999;
+  border-top: 1px solid #eee;
+  padding-top: 20px;
+}
+
+code {
+  background: #eee;
+  padding: 2px 4px;
+  border-radius: 3px;
+  color: #333;
+}
 </style>

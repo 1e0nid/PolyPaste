@@ -22,15 +22,15 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="paste in pastes" :key="paste.id">
-            <td class="paste-title" @click="viewPaste(paste.id)">
-              {{ paste.title || 'Без названия' }}
+          <tr v-for="paste in pastes" :key="paste.shortId">
+            <td class="paste-title" @click="viewPaste(paste.shortId)">
+              {{ paste.title || paste.shortId || 'Без названия' }}
             </td>
-            <td>{{ formatDate(paste.created_at) }}</td>
-            <td>{{ paste.expires_at || 'Бессрочно' }}</td>
+            <td>{{ formatDate(paste.createdAt) }}</td>
+            <td>{{ paste.expiresAt || 'Бессрочно' }}</td>
             <td class="actions">
-              <button class="btn-icon" title="Редактировать">✏️</button>
-              <button class="btn-icon delete" title="Удалить">🗑️</button>
+              <button class="btn-icon" title="Редактировать" @click="editPaste(paste.shortId)">✏️</button>
+              <button class="btn-icon delete" title="Удалить" @click="confirmDelete(paste.shortId)">🗑️</button>
             </td>
           </tr>
         </tbody>
@@ -49,34 +49,75 @@ const auth = useAuthStore()
 const loading = ref(true)
 const pastes = ref([])
 
-// Используем твой динамический домен для будущих запросов
-const apiBase = computed(() => import.meta.env.VITE_API_URL || window.location.origin)
+const apiBase = computed(() => import.meta.env.VITE_API_URL || 'http://localhost:80')
 
+// --- ПОЛУЧЕНИЕ СПИСКА ПАСТ ---
 const fetchPastes = async () => {
   loading.value = true
-  
-  // ИМИТАЦИЯ: В будущем здесь будет fetch(`${apiBase.value}/api/my-pastes`)
-  setTimeout(() => {
-    pastes.value = [
-      { id: 1, title: 'SQL запрос для Car Service', created_at: '2026-04-10T12:00:00', expires_at: '1 месяц' },
-      { id: 2, title: 'Лабораторная работа №3 (C++)', created_at: '2026-05-01T09:30:00', expires_at: 'Бессрочно' },
-      { id: 3, title: 'Черновик статьи по оптимизации', created_at: '2026-05-07T15:45:00', expires_at: '1 неделя' }
-    ]
+  const token = localStorage.getItem('jwt')
+
+  try {
+    const response = await fetch(`${apiBase.value}/api/pastes/myPastes`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      }
+    })
+
+    if (response.status === 401 || response.status === 403) {
+      router.push('/login')
+      return
+    }
+
+    if (!response.ok) throw new Error(`Ошибка: ${response.status}`)
+    
+    pastes.value = await response.json()
+  } catch (error) {
+    console.error('Ошибка загрузки:', error)
+    pastes.value = []
+  } finally {
     loading.value = false
-  }, 800)
+  }
 }
 
-const viewPaste = (id) => {
-  router.push(`/view/${id}`)
+// --- УДАЛЕНИЕ ПАСТЫ ---
+const confirmDelete = async (shortId) => {
+  if (!confirm('Вы уверены, что хотите удалить эту пасту?')) return
+  
+  const token = localStorage.getItem('jwt')
+  try {
+    const response = await fetch(`${apiBase.value}/api/pastes/${shortId}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
+
+    if (!response.ok) throw new Error('Ошибка удаления')
+
+    // Фильтруем массив по полю shortId
+    pastes.value = pastes.value.filter(p => p.shortId !== shortId)
+    alert('Паста успешно удалена')
+  } catch (error) {
+    console.error(error)
+    alert('Не удалось удалить пасту')
+  }
 }
+
+// Функции перехода (id здесь — это фактически полученный shortId)
+const viewPaste = (id) => router.push(`/paste/${id}`)
+const editPaste = (id) => router.push(`/edit/${id}`)
 
 const formatDate = (dateString) => {
-  const options = { year: 'numeric', month: 'short', day: 'numeric' }
-  return new Date(dateString).toLocaleDateString('ru-RU', options)
+  if (!dateString) return 'Неизвестно'
+  return new Date(dateString).toLocaleDateString('ru-RU', { 
+    year: 'numeric', month: 'short', day: 'numeric' 
+  })
 }
 
 onMounted(() => {
-  if (!auth.isAuthenticated) {
+  if (!localStorage.getItem('jwt')) {
     router.push('/login')
   } else {
     fetchPastes()
@@ -85,89 +126,16 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.pastes-container {
-  padding: 10px;
-}
-
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 25px;
-  border-bottom: 2px solid #eee;
-  padding-bottom: 15px;
-}
-
-h2 {
-  color: #1b5e20;
-  margin: 0;
-}
-
-.btn-create {
-  background-color: #43a047;
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: bold;
-}
-
-.loading-state, .empty-state {
-  text-align: center;
-  padding: 50px;
-  color: #666;
-}
-
-.pastes-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.pastes-table th {
-  text-align: left;
-  padding: 12px;
-  background-color: #f8f9fa;
-  color: #333;
-  font-size: 14px;
-  border-bottom: 1px solid #ddd;
-}
-
-.pastes-table td {
-  padding: 12px;
-  border-bottom: 1px solid #eee;
-  font-size: 14px;
-}
-
-.paste-title {
-  color: #1b5e20;
-  font-weight: bold;
-  cursor: pointer;
-}
-
-.paste-title:hover {
-  text-decoration: underline;
-}
-
-.actions {
-  display: flex;
-  gap: 10px;
-}
-
-.btn-icon {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 16px;
-  padding: 4px;
-  border-radius: 4px;
-}
-
-.btn-icon:hover {
-  background-color: #f0f0f0;
-}
-
-.btn-icon.delete:hover {
-  background-color: #ffebee;
-}
+.pastes-container { padding: 20px; }
+.page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 2px solid #eee; padding-bottom: 15px; }
+h2 { color: #1b5e20; margin: 0; }
+.btn-create { background-color: #43a047; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+.pastes-table { width: 100%; border-collapse: collapse; }
+.pastes-table th { text-align: left; padding: 12px; background-color: #f8f9fa; border-bottom: 1px solid #ddd; font-size: 14px; }
+.pastes-table td { padding: 12px; border-bottom: 1px solid #eee; font-size: 14px; }
+.paste-title { color: #1b5e20; font-weight: bold; cursor: pointer; }
+.actions { display: flex; gap: 10px; }
+.btn-icon { background: none; border: none; cursor: pointer; font-size: 16px; opacity: 0.7; }
+.btn-icon:hover { opacity: 1; }
+.btn-icon.delete { color: #c62828; }
 </style>

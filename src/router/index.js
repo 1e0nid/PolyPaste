@@ -9,6 +9,8 @@ import ArchiveView from '../views/ArchiveView.vue'
 // Страницы друга:
 import LoginView from '../views/LoginView.vue'
 import MyPastesView from '../views/MyPastesView.vue'
+import EditPasteView from '../views/EditPasteView.vue'
+import SearchResultsView from '../views/SearchResultsView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -36,6 +38,17 @@ const router = createRouter({
       // Я убрал requiresAuth, чтобы любой человек мог посмотреть публичную пасту по ссылке
     },
     {
+      path: '/search',
+      name: 'search',
+      component: SearchResultsView
+    },
+    {
+      path: '/edit/:id',
+      name: 'edit-paste',
+      component: EditPasteView,
+      meta: { requiresAuth: true } // Редактировать можно только авторизованным
+    },
+    {
       path: '/my-pastes',
       name: 'my-pastes',
       component: MyPastesView,
@@ -51,7 +64,7 @@ router.beforeEach((to, from, next) => {
   
   // Если страница требует входа (requiresAuth === true) и пользователь НЕ вошел
   if (to.meta.requiresAuth && !auth.isAuthenticated) {
-    next('/login') // Выгоняем его на страницу логина
+    return '/login' // Выгоняем его на страницу логина
   } else {
     next() // Иначе - пускаем на страницу без проблем
   }
