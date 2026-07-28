@@ -1,0 +1,74 @@
+spring:
+  application:
+    name: PolyPaste
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: admin
+    password: admin
+
+  datasource:
+    url: jdbc:postgresql://localhost:5439/Poly_Paste
+    username: admin
+    password: admin
+    hikari:
+      maximum-pool-size: 40
+      minimum-idle: 10
+      idle-timeout: 30000
+      pool-name: PolyPasteHikariPool
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+
+app:
+  base-back-url: http://localhost:5173
+
+  rabbitmq:
+    queue:
+      input: q1
+      output: q2
+    exchange: moderation-exchange
+    routing-key:
+      input: moderation.input
+      output: moderation.output
+  ml:
+    model-path: src/main/resources/models/rubert-tiny-toxic.onnx
+    threshold: 0.3
+
+  minio:
+    endpoint: http://127.0.0.1:9000
+    access-key: admin
+    secret-key: superpassword
+    bucket: pastes
+    auto-create-bucket: true
+
+jwt:
+  secret: CHANGE_ME
+
+vk:
+  app-id: CHANGE_ME
+  client-secret: CHANGE_ME
+  redirect-uri: http://localhost/auth/vk/callback
+
+server:
+  address: 0.0.0.0
+  port: 80
+  tomcat:
+    threads:
+      max: 200
+      min-spare: 20
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+  api-docs:
+    path: /v3/api-docs

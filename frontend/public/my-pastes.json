@@ -1,0 +1,26 @@
+[
+  { 
+    "id": "p1", 
+    "title": "Untitled Paste", 
+    "created_at": "2026-05-08T10:00:00", 
+    "expires_at": "1 неделя" 
+  },
+  { 
+    "id": "demo-123", 
+    "title": "BEST EBOOKS 2026 PART 2", 
+    "created_at": "2026-05-07T15:30:00", 
+    "expires_at": "Бессрочно" 
+  },
+  { 
+    "id": "demo-123", 
+    "title": "BEST EBOOKS 2026 PART 2", 
+    "created_at": "2026-05-07T15:30:00", 
+    "expires_at": "Бессрочно" 
+  },
+  { 
+    "id": "p5", 
+    "title": "webview2-workaround.sh", 
+    "created_at": "2026-05-05T08:15:00", 
+    "expires_at": "1 месяц" 
+  }
+]

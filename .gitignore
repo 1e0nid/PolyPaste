@@ -1,0 +1,68 @@
+# =========================
+# Секреты и конфиги с паролями
+# =========================
+.env
+.env.*
+!.env.example
+application.yml
+application-local.yml
+application-dev.yml
+application-prod.yml
+
+# SSL / ключи / сертификаты
+*.p12
+*.jks
+*.pem
+*.key
+*.crt
+
+# =========================
+# Данные контейнеров (генерируются в рантайме)
+# =========================
+minio_data/
+postgres_data/
+redis_data/
+rabbitmq_data/
+opensearch_data/
+
+# =========================
+# Backend (Java / Maven)
+# =========================
+backend/PolyPaste/target/
+!**/src/main/**/target/
+!**/src/test/**/target/
+backend/PolyPaste/.mvn/wrapper/maven-wrapper.jar
+
+# =========================
+# Frontend (Node / Vite)
+# =========================
+frontend/node_modules/
+frontend/dist/
+frontend/dist-ssr/
+frontend/coverage/
+frontend/*.local
+frontend/.eslintcache
+frontend/*.tsbuildinfo
+
+# =========================
+# IDE
+# =========================
+.idea/
+*.iws
+*.iml
+*.ipr
+.vscode/*
+!.vscode/extensions.json
+
+# =========================
+# Логи / временные файлы
+# =========================
+*.log
+logs/
+*.tmp
+*.temp
+*.swp
+*~
+.DS_Store
+Thumbs.db
+/backend/PolyPaste/minio_data/

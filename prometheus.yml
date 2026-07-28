@@ -1,0 +1,14 @@
+global:
+  scrape_interval: 5s
+
+scrape_configs:
+  # Идем за метриками в твою IntelliJ IDEA
+  - job_name: 'spring-backend'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['host.docker.internal:80'] 
+
+  # Собираем метрики RAM и CPU
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: ['cadvisor:8080']
