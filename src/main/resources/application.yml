@@ -17,13 +17,20 @@ spring:
     url: jdbc:postgresql://localhost:5439/Poly_Paste
     username: admin
     password: admin
+    hikari:
+      maximum-pool-size: 40
+      minimum-idle: 10
+      idle-timeout: 30000
+      pool-name: PolyPasteHikariPool
 
   jpa:
     hibernate:
       ddl-auto: update
-    show-sql: true
+    show-sql: false
 
 app:
+  base-back-url: http://localhost:5173
+
   rabbitmq:
     queue:
       input: q1
@@ -37,23 +44,27 @@ app:
     threshold: 0.3
 
   minio:
-    endpoint: http://localhost:9000
+    endpoint: http://127.0.0.1:9000
     access-key: admin
-    secret-key: admin
+    secret-key: superpassword
     bucket: pastes
     auto-create-bucket: true
 
 jwt:
-  secret: 5JzoMbk6E5qIqHSuBTgeQCARtUsxAkBiHwdjXOSW8kWdXzYmP3X51C0
+  secret: CHANGE_ME
 
 vk:
-  app-id: 54580162
-  client-secret: 'DMMaDDCHTGmwcFb0JfU9'
+  app-id: CHANGE_ME
+  client-secret: CHANGE_ME
   redirect-uri: http://localhost/auth/vk/callback
 
 server:
   address: 0.0.0.0
   port: 80
+  tomcat:
+    threads:
+      max: 200
+      min-spare: 20
 
 springdoc:
   swagger-ui:

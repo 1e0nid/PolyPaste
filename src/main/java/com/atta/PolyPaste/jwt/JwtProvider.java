@@ -6,6 +6,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -14,16 +15,13 @@ import java.time.temporal.ChronoUnit;
 import java.util.Date;
 
 @Service
+@RequiredArgsConstructor
 public class JwtProvider {
 
     @Value("${jwt.secret}")
     private String secretKey;
 
     final private VkUserRepository vkUserRepository;
-
-    public JwtProvider(VkUserRepository vkUserRepository) {
-        this.vkUserRepository = vkUserRepository;
-    }
 
     public String generateToken(Long id, String firstName, String lastName) {
         return Jwts.builder()

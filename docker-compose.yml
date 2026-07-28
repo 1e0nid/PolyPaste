@@ -33,9 +33,11 @@ services:
       - "6379:6379"
     volumes:
       - redis_data:/data
+    command: redis-server --maxmemory 2gb --maxmemory-policy allkeys-lru
 
   minio:
     image: minio/minio
+    container_name: my-minio-container
     ports:
       - "9000:9000"
       - "9001:9001"
@@ -46,7 +48,24 @@ services:
       - ./minio_data:/data
     command: server /data --console-address ":9001"
 
+  opensearch:
+    build:
+      context: ./opensearch
+    container_name: poly-opensearch
+    environment:
+      - discovery.type=single-node
+      - plugins.security.disabled=true
+      - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m"
+    ports:
+      - "9200:9200"
+      - "9600:9600"
+    volumes:
+      - opensearch_data:/usr/share/opensearch/data
+    depends_on:
+      - minio
+
 volumes:
   rabbitmq_data:
   postgres_data:
   redis_data:
+  opensearch_data:

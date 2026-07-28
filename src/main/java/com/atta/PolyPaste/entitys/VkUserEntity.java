@@ -16,6 +16,6 @@ public class VkUserEntity {
     @Column
     private String lastName;
 
-    @Column
+    @Column(length = 1000)
     private String avatarUrl;
 }

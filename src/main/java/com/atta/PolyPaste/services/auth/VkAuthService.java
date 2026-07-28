@@ -67,7 +67,7 @@ public class VkAuthService {
     }
 
     @Transactional
-    public String processVkAuth(String code, String codeVerifier, String deviceId) throws Exception {
+    public VkUserEntity processVkAuth(String code, String codeVerifier, String deviceId) throws Exception {
         RestTemplate restTemplate = new RestTemplate();
         String tokenUrl = "https://id.vk.ru/oauth2/auth";
 
@@ -102,6 +102,10 @@ public class VkAuthService {
         VkUserEntity userEntity = vkUserRepository.findByVkId(vkUser.getId())
                 .orElseGet(() -> vkUserRepository.save(vkUserMapper.toEntity(vkUser)));
 
-        return jwtProvider.generateToken(userEntity.getVkId(), userEntity.getFirstName(), userEntity.getLastName());
+        return userEntity;
+    }
+
+    public String createToken(Long id, String firstName, String lastName){
+        return jwtProvider.generateToken(id, firstName, lastName);
     }
 }

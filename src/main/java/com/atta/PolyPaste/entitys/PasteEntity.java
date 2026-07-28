@@ -1,9 +1,11 @@
 package com.atta.PolyPaste.entitys;
 
+import com.atta.PolyPaste.enums.Visibility;
 import jakarta.persistence.*;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "pastes")
@@ -11,17 +13,20 @@ import java.time.LocalDateTime;
 public class PasteEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     @Column(name = "short_url", unique = true, nullable = false, length = 8)
     private String shortUrl;
 
-    @Column(columnDefinition = "TEXT")
-    private String content;
-
     @Column(name = "creator_id")
     private String creatorId;
+
+    @Column(name = "password_hash")
+    private String passwordHash;
+
+    @Column(name = "minio_key")
+    private String minioKey;
 
     @Column(name = "first_name")
     private String firstName;
@@ -43,4 +48,8 @@ public class PasteEntity {
 
     @Column(name = "status")
     private String status;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "visibility", nullable = false)
+    private Visibility visibility = Visibility.PUBLIC;
 }

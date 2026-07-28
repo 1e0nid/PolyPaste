@@ -1,5 +1,7 @@
 package com.atta.PolyPaste.dto;
 
+import com.atta.PolyPaste.enums.Visibility;
+
 import java.time.LocalDateTime;
 
 public record PasteMessageDto (
@@ -11,5 +13,7 @@ public record PasteMessageDto (
     String lastName,
     String syntax,
     LocalDateTime expirationTime,
-    boolean burnAfterRead
+    boolean burnAfterRead,
+    Visibility visibility,
+    String password
 ) {}
