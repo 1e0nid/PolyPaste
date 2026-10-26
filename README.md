@@ -81,8 +81,6 @@ vk:
   redirect-uri: http://localhost/auth/vk/callback
 ```
 
-> ⚠️ Файл `application.yml` содержит секреты и **не должен попадать в git** — см. раздел "Безопасность" ниже.
-
 ### 3. Запустить backend
 
 ```bash
@@ -104,7 +102,3 @@ npm run dev
 - Grafana: http://localhost:3000
 - cAdvisor: http://localhost:8080
 
-## Безопасность
-
-- Не коммитьте `application.yml`, `.env`, `*.p12`/`*.jks` — все они добавлены в `.gitignore`.
-- Все пароли/ключи в примерах выше — плейсхолдеры, замените на свои перед запуском в проде.
